@@ -81,4 +81,58 @@ RSpec.describe ItemsController do
       end
     end
   end
+
+  describe 'PATCH #update' do
+    before :each do
+      @item = create(:item)
+    end
+
+    context "with valid attributes" do
+      it "locates the requested @item" do
+        patch :update, params: { id: @item, item: attributes_for(:item) }
+        expect(assigns(:item)).to eq @item
+      end
+
+      it "changes @item's attributes" do
+        patch :update, params: { id: @item, item: attributes_for(:item, name: 'Nasi Uduk') }
+        @item.reload
+        expect(@item.name).to eq('Nasi Uduk')
+      end
+
+      it "redirects to the item" do
+        patch :update, params: { id: @item, item: attributes_for(:item) }
+        expect(response).to redirect_to @item
+      end
+    end
+
+    context "with invalid attributes" do
+      it "does not update the item in the database" do
+        expect{
+          patch :update, params: { id: @item, item: attributes_for(:invalid_item) }
+        }.not_to change(Item, :name)
+      end
+
+      it "re-renders the :edit template" do
+        patch :update, params: { id: @item, item: attributes_for(:invalid_item) }
+        expect(response).to render_template :edit
+      end
+    end
+  end
+
+  describe 'DELETE #destroy' do
+    before :each do
+      @item = create(:item)
+    end
+
+    it "deletes the item from the database" do
+      expect{
+        delete :destroy, params: { id: @item }
+      }.to change(Item, :count).by(-1)
+    end
+
+    it "redirects to items#index" do
+      delete :destroy, params: { id: @item }
+      expect(response).to redirect_to items_url
+    end
+  end
 end
